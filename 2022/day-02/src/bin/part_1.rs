@@ -1,4 +1,24 @@
-use std::fs;
+use std::{fs, str::FromStr};
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+enum Move {
+    Rock = 1,
+    Paper = 2,
+    Scissors = 3,
+}
+
+impl FromStr for Move {
+    type Err = ();
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "A" | "X" => Ok(Move::Rock),
+            "B" | "Y" => Ok(Move::Paper),
+            "C" | "Z" => Ok(Move::Scissors),
+            _ => unreachable!(),
+        }
+    }
+}
 
 fn main() {
     let input = fs::read_to_string("input.txt").unwrap();
@@ -9,43 +29,27 @@ fn main() {
 }
 
 fn function(input: String) -> u32 {
-    // Given a input string with the first column between A and C, and the second column
-    // between X and Z. A, X are worth 1 point, B, Y are worth 2 points, and C, Z are worth
-    // 3 points.
-    // A, X beat C, Z
-    // B, Y beat A, X
-    // C, Z beat B, Y
-    // Losing gives 0 points, a draw gives 3 additional points, and a win gives 6 additional
-    // points.
-    // Return the total number of points for the input.
     input
         .lines()
         .map(|line| {
-            let mut chars = line.chars();
-            let first = chars.next().unwrap();
-            let _ = chars.next().unwrap();
-            let second = chars.next().unwrap();
+            let moves: Vec<Move> = line
+                .split(" ".chars().next().unwrap())
+                .map(|letter| letter.parse::<Move>().unwrap())
+                .collect();
 
-            let mut points = match second {
-                'A' | 'X' => 1,
-                'B' | 'Y' => 2,
-                'C' | 'Z' => 3,
-                _ => panic!("Invalid second character"),
-            };
+            let (their_move, my_move) = (moves[0], moves[1]);
 
-            if first == 'C' && second == 'X' {
-                points += 6;
-            } else if first == 'A' && second == 'Y' {
-                points += 6;
-            } else if first == 'B' && second == 'Z' {
-                points += 6;
-            } else if first == 'A' && second == 'X' {
-                points += 3;
-            } else if first == 'B' && second == 'Y' {
-                points += 3;
-            } else if first == 'C' && second == 'Z' {
-                points += 3;
+            let mut points = my_move as u32;
+
+            match (my_move, their_move) {
+                (Move::Rock, Move::Scissors)
+                | (Move::Paper, Move::Rock)
+                | (Move::Scissors, Move::Paper) => points += 6,
+                _ if my_move == their_move => points += 3,
+                _ => points += 0,
             }
+
+            dbg!(points);
 
             points
         })
