@@ -33,7 +33,7 @@ fn function(input: String) -> u32 {
         .lines()
         .map(|line| {
             let moves: Vec<Move> = line
-                .split(" ".chars().next().unwrap())
+                .split(' ')
                 .map(|letter| letter.parse::<Move>().unwrap())
                 .collect();
 
