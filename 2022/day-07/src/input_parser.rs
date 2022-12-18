@@ -1,7 +1,7 @@
 use nom::{
     branch::alt,
     bytes::complete::{tag, take_until},
-    character::complete::{alpha1, newline},
+    character::complete::{alpha1, newline, not_line_ending},
     multi::separated_list1,
     sequence::separated_pair,
     IResult,
@@ -23,7 +23,7 @@ pub enum Cd<'a> {
 #[derive(Debug)]
 pub enum FsObject<'a> {
     Dir(&'a str),
-    File { size: u32, name: &'a str },
+    File(u32),
 }
 
 pub fn parse_input(input: &str) -> IResult<&str, Vec<Command>> {
@@ -61,8 +61,8 @@ fn parse_dir(input: &str) -> IResult<&str, FsObject> {
 }
 
 fn parse_file(input: &str) -> IResult<&str, FsObject> {
-    let (input, (size, name)) =
-        separated_pair(nom::character::complete::u32, tag(" "), take_until("\n"))(input)?;
-    let result = FsObject::File { size, name };
+    let (input, (size, _)) =
+        separated_pair(nom::character::complete::u32, tag(" "), not_line_ending)(input)?;
+    let result = FsObject::File(size);
     Ok((input, result))
 }

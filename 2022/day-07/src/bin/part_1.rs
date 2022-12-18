@@ -1,7 +1,9 @@
 use std::{collections::BTreeMap, fs};
 
 extern crate day_07;
-use day_07::input_parser::{parse_input, Cd, Command, FsObject};
+
+use day_07::dir_size_calc::calculate_dir_sizes;
+use day_07::input_parser::parse_input;
 
 fn main() {
     let input = fs::read_to_string("input.txt").unwrap();
@@ -14,50 +16,16 @@ fn main() {
 fn function(input: String) -> u32 {
     let (_, commands) = parse_input(&input).unwrap();
 
-    let mut file_tree = BTreeMap::new();
+    let (_, dir_sizes) = commands
+        .iter()
+        .fold((vec![], BTreeMap::new()), calculate_dir_sizes);
 
-    let mut current_dir_name = "/";
-
-    for command in commands {
-        match command {
-            Command::Cd(Cd::Root) => {
-                file_tree.insert("/", BTreeMap::new());
-            }
-            Command::Cd(Cd::Up) => (),
-            Command::Cd(Cd::Down(name)) => (),
-            Command::Ls(list) => {
-                for fs_object in list {
-                    match fs_object {
-                        FsObject::Dir(name) => {
-                            file_tree.insert(name, BTreeMap::new());
-                        }
-                        FsObject::File { size, name } => (),
-                    }
-                }
-            }
-        }
-    }
-
-    dbg!(file_tree);
-    0
+    dir_sizes
+        .iter()
+        .filter(|(_, &size)| size < 100_000)
+        .map(|(_, size)| size)
+        .sum::<u32>()
 }
-
-// #[derive(Debug)]
-// struct Dir<'a> {
-//     children: BTreeMap<FsObject>,
-// }
-
-// #[derive(Debug)]
-// struct File<'a> {
-//     name: &'a str,
-//     size: u32,
-// }
-
-// #[derive(Debug)]
-// enum FsObject {
-//     Dir(Dir),
-//     File(File),
-// }
 
 #[cfg(test)]
 mod tests {
