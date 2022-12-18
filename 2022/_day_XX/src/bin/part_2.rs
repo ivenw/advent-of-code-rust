@@ -1,5 +1,7 @@
 use std::fs;
 
+extern crate day_xx;
+
 fn main() {
     let input = fs::read_to_string("input.txt").unwrap();
 
