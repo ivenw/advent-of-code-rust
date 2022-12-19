@@ -1,24 +1,14 @@
 use ndarray::Array2;
 
-#[derive(Debug, Default, Clone)]
-pub struct Tree {
-    pub height: u32,
-    pub h_visible: bool,
-    pub v_visible: bool,
-}
-
-pub fn parse_input(input: &str) -> Array2<Tree> {
+pub fn parse_input(input: &str) -> Array2<u32> {
     let trees = input
         .lines()
         .map(|line| {
             line.chars()
-                .map(|c| Tree {
-                    height: c.to_digit(10).unwrap(),
-                    ..Default::default()
-                })
-                .collect::<Vec<Tree>>()
+                .map(|c| c.to_digit(10).unwrap())
+                .collect::<Vec<u32>>()
         })
-        .collect::<Vec<Vec<Tree>>>();
+        .collect::<Vec<Vec<u32>>>();
 
     Array2::from_shape_vec((trees.len(), trees[0].len()), trees.concat()).unwrap()
 }
