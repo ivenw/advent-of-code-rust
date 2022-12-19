@@ -1,7 +1,15 @@
-use std::fs;
+use std::{fs, iter::zip};
+
+extern crate day_08;
+
+use day_08::input_parser::parse_input;
+use ndarray::{
+    iter::{Lanes, LanesMut},
+    Array2,
+};
 
 fn main() {
-    let input = fs::read_to_string("input.txt").unwrap();
+    let input = fs::read_to_string("test_input.txt").unwrap();
 
     let result = function(input);
 
@@ -9,7 +17,10 @@ fn main() {
 }
 
 fn function(input: String) -> u32 {
-    0
+    let trees = parse_input(&input);
+    let mut scenic_scores = Array2::from_elem(trees.dim(), 0);
+
+    scenic_scores.iter().max().unwrap().to_owned()
 }
 
 #[cfg(test)]
@@ -23,6 +34,6 @@ mod tests {
 
         let result = function(input);
 
-        assert_eq!(result, 0);
+        assert_eq!(result, 8);
     }
 }

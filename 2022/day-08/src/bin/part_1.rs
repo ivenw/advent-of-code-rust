@@ -5,7 +5,7 @@ extern crate day_08;
 use day_08::input_parser::parse_input;
 use ndarray::{
     iter::{Lanes, LanesMut},
-    Array2,
+    Array2, Dim,
 };
 
 fn main() {
@@ -17,57 +17,49 @@ fn main() {
 }
 
 fn function(input: String) -> u32 {
-    let trees = parse_input(&input);
-    let mut visibility = Array2::from_elem(trees.dim(), 0);
+    let tree_heights = parse_input(&input);
+    let mut tree_visibilities = Array2::from_elem(tree_heights.dim(), 0);
     // visibility.map(RefCell::new);
 
     // Fill in the boarder with 1s
-    visibility.column_mut(0).fill(1);
-    visibility.column_mut(visibility.ncols() - 1).fill(1);
-    visibility.row_mut(0).fill(1);
-    visibility.row_mut(visibility.nrows() - 1).fill(1);
+    tree_visibilities.column_mut(0).fill(1);
+    tree_visibilities
+        .column_mut(tree_visibilities.ncols() - 1)
+        .fill(1);
+    tree_visibilities.row_mut(0).fill(1);
+    tree_visibilities
+        .row_mut(tree_visibilities.nrows() - 1)
+        .fill(1);
 
-    for (tree_col, mut vis_col) in zip(trees.columns(), visibility.columns_mut()) {
-        let mut max_tree_height_so_far = 0;
+    walk_tree_lanes(tree_heights.columns(), tree_visibilities.columns_mut());
+    walk_tree_lanes(tree_heights.rows(), tree_visibilities.rows_mut());
 
-        for (tree, vis) in zip(tree_col.iter(), vis_col.iter_mut()) {
-            if *tree > max_tree_height_so_far {
-                *vis = 1;
-            }
-            max_tree_height_so_far = max_tree_height_so_far.max(*tree);
-        }
+    tree_visibilities.sum()
+}
 
-        max_tree_height_so_far = 0;
+fn walk_tree_lanes(
+    height_lanes: Lanes<u32, Dim<[usize; 1]>>,
+    visibility_lanes: LanesMut<u32, Dim<[usize; 1]>>,
+) {
+    for (height_lane, mut visibility_lane) in zip(height_lanes, visibility_lanes) {
+        compare_trees(height_lane.iter(), visibility_lane.iter_mut());
 
-        for (tree, vis) in zip(tree_col.iter().rev(), vis_col.iter_mut().rev()) {
-            if *tree > max_tree_height_so_far {
-                *vis = 1;
-            }
-            max_tree_height_so_far = max_tree_height_so_far.max(*tree);
-        }
+        compare_trees(height_lane.iter().rev(), visibility_lane.iter_mut().rev());
     }
+}
 
-    for (tree_col, mut vis_col) in zip(trees.rows(), visibility.rows_mut()) {
-        let mut max_tree_height_so_far = 0;
+fn compare_trees<'a>(
+    height_lane: impl Iterator<Item = &'a u32>,
+    visibility_lane: impl Iterator<Item = &'a mut u32>,
+) {
+    let mut max_tree_height_so_far = 0;
 
-        for (tree, vis) in zip(tree_col.iter(), vis_col.iter_mut()) {
-            if *tree > max_tree_height_so_far {
-                *vis = 1;
-            }
-            max_tree_height_so_far = max_tree_height_so_far.max(*tree);
+    for (height, visibility) in zip(height_lane, visibility_lane) {
+        if *height > max_tree_height_so_far {
+            *visibility = 1;
         }
-
-        max_tree_height_so_far = 0;
-
-        for (tree, vis) in zip(tree_col.iter().rev(), vis_col.iter_mut().rev()) {
-            if *tree > max_tree_height_so_far {
-                *vis = 1;
-            }
-            max_tree_height_so_far = max_tree_height_so_far.max(*tree);
-        }
+        max_tree_height_so_far = max_tree_height_so_far.max(*height);
     }
-
-    visibility.sum()
 }
 
 #[cfg(test)]
