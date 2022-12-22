@@ -15,36 +15,35 @@ fn main() {
 fn function(input: String) -> i32 {
     let (_, instructions) = parse_input(&input).unwrap();
 
-    let mut register_x = 1;
-    let mut cycle = 0;
-    let mut signal_strengths = Vec::<i32>::new();
-
-    let mut instruction_duration = 1;
-    let mut current_instruction = Instruction::Noop;
+    let mut instruction = Instruction::Noop;
+    let mut duration = instruction.cycles();
 
     let mut instructions = instructions.into_iter();
 
+    let mut register_x = 1;
+    let mut cycle = 0;
+    let mut signal_strengths = Vec::<i32>::new();
     let mut looping = true;
     while looping {
-        instruction_duration -= 1;
+        duration -= 1;
 
         if cycle == 20 || (cycle > 20 && (cycle - 20) % 40 == 0) {
             signal_strengths.push(register_x * cycle);
         }
 
         // If current instruction is done
-        if instruction_duration == 0 {
+        if duration == 0 {
             // Add its value to the register
-            current_instruction.addx(&mut register_x);
+            instruction.addx(&mut register_x);
 
             // Get the next instruction. If there is none, stop looping
-            current_instruction = instructions.next().unwrap_or_else(|| {
+            instruction = instructions.next().unwrap_or_else(|| {
                 looping = false;
                 Instruction::Noop
             });
 
             // Set the duration of the next instruction
-            instruction_duration = current_instruction.cycles();
+            duration = instruction.cycles();
         }
 
         // Advance cpu cycle
