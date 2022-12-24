@@ -2,6 +2,8 @@ use std::fs;
 
 extern crate day_xx;
 
+use day_xx::input_parser::parse_input;
+
 fn main() {
     let input = fs::read_to_string("input.txt").unwrap();
 
@@ -11,6 +13,8 @@ fn main() {
 }
 
 fn function(input: String) -> u32 {
+    let (_, result) = parse_input(&input).unwrap();
+
     0
 }
 
