@@ -15,8 +15,10 @@ fn main() {
 fn function(input: String) -> u32 {
     let (_, mut map) = parse_input(&input).unwrap();
 
-    map.push(vec![Tile::Empty; map[0].len()]);
-    map.push(vec![Tile::Rock; map[0].len()]);
+    map.extend(vec![
+        vec![Tile::Empty; map[0].len()],
+        vec![Tile::Rock; map[0].len()],
+    ]);
 
     let sand_spawn = Coors { x: 500, y: 0 };
 

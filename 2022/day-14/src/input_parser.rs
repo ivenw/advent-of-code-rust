@@ -27,14 +27,13 @@ pub struct Coors {
 pub fn parse_input(input: &str) -> IResult<&str, Map> {
     let (_, rock_paths) = separated_list1(newline, path)(input)?;
 
-    let (x_max, y_max) = rock_paths
+    let y_max = rock_paths
         .iter()
-        .flat_map(|path| path.iter())
-        .fold((0, 0), |(x_max, y_max), coors| {
-            (x_max.max(coors.x), y_max.max(coors.y))
-        });
+        .flat_map(|path| path.iter().map(|coors| coors.y))
+        .max()
+        .unwrap();
 
-    let mut map = vec![vec![Tile::Empty; (x_max + 500) as usize]; (y_max + 1) as usize];
+    let mut map = vec![vec![Tile::Empty; 1000]; (y_max + 1) as usize];
 
     rock_paths.iter().for_each(|path| {
         path.iter().tuple_windows().for_each(|(start, stop)| {
