@@ -1,0 +1,9 @@
+[package]
+name = "day-17"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+indexmap = "1.9.2"
+itertools = "0.10.5"
+nom = "7.1.1"
