@@ -7,12 +7,11 @@ fn main() {
 
     println!("{}", result)
 }
-
-#[derive(Debug)]
 struct Number {
     value: u32,
     neighbors: HashSet<Coord>,
 }
+
 #[derive(Eq, Hash, PartialEq)]
 struct Char {
     value: char,
@@ -26,8 +25,8 @@ struct Coord {
 
 fn solve(input: &str) -> u32 {
     let mut buffer: VecDeque<Char> = VecDeque::new();
-    let mut numbers = vec![];
-    let mut symbols: HashSet<Coord> = HashSet::new();
+    let mut numbers: Vec<Number> = vec![];
+    let mut gear_coords = vec![];
     input.lines().enumerate().for_each(|(y, line)| {
         line.chars().enumerate().for_each(|(x, c)| {
             if c.is_ascii_digit() {
@@ -37,9 +36,9 @@ fn solve(input: &str) -> u32 {
                 };
                 buffer.push_back(symbol);
             } else {
-                if c != '.' {
+                if c == '*' {
                     let coord = Coord { x, y };
-                    symbols.insert(coord);
+                    gear_coords.push(coord);
                 }
                 if !buffer.is_empty() {
                     let value = buffer
@@ -56,18 +55,27 @@ fn solve(input: &str) -> u32 {
                         buffer.pop_back().unwrap().coord
                     };
                     let neighbors = generate_neighbors(min_coord, max_coord);
-
-                    numbers.push(Number { value, neighbors });
+                    let number = Number { value, neighbors };
+                    numbers.push(number);
                     buffer.clear();
                 }
             }
         })
     });
 
-    numbers
+    gear_coords
         .iter()
-        .filter(|number| !number.neighbors.is_disjoint(&symbols))
-        .map(|number| number.value)
+        .map(|g| {
+            numbers.iter().filter_map(|n| {
+                if n.neighbors.contains(g) {
+                    Some(n.value)
+                } else {
+                    None
+                }
+            })
+        })
+        .filter_map(|n| if n.clone().count() > 1 { Some(n) } else { None })
+        .map(|n| n.product::<u32>())
         .sum()
 }
 
@@ -108,6 +116,6 @@ mod tests {
 
     #[test]
     fn test_solve() {
-        assert_eq!(solve(INPUT), 4361);
+        assert_eq!(solve(INPUT), 467835);
     }
 }
